@@ -2,7 +2,7 @@
 生成验证test数据集结果的CSV文件
 '''
 import os
-from common import root_dirs, load_json, read_to_array, save_file
+from common import root_dirs, load_json, read_to_array, save_file,csqa_data_dirs
 
 label_dict = {
     '0':'A',
@@ -12,8 +12,8 @@ label_dict = {
     '4':'E',
 }
 if __name__ == '__main__':
-    results_file = os.path.join(root_dirs, 'results', 'weight_rel.csv')
-    gold_file = os.path.join(root_dirs, 'csqa_data', 'conceptnet', 'weight_rel', 'test_data.json')
+    results_file = os.path.join(csqa_data_dirs, 'data', 'weight_rel.csv')
+    gold_file = os.path.join(csqa_data_dirs, 'csqa_data', 'conceptnet', 'weight_rel', 'test_data.json')
 
     results = read_to_array(results_file)
     golds = load_json(gold_file)

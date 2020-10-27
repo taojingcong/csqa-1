@@ -134,6 +134,8 @@ def _make_dataloader_conceptnet(examples, tokenizer, batch_size, drop_last, max_
 
     for example in examples:
         # fe, la = example.fl(tokenizer, max_seq_length)
+        #f1-f5 为问题+每个选项的三元组
+        #la 为label
         f1, f2, f3, f4, f5, la = example.fl(tokenizer, max_seq_length)
 
         F.append((f1, f2, f3, f4, f5))

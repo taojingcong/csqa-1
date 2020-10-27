@@ -211,7 +211,7 @@ if __name__ == '__main__':
     
     print("args.fp16 is {}".format(args.fp16))
     assert args.mission in ('train', 'output')
-
+    #固定随机数
     # ------------------------------------------------#
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -221,6 +221,7 @@ if __name__ == '__main__':
     # ------------------------------------------------#
     experiment = 'conceptnet'
     print('load_data', args.train_file_name)
+    #问题+三元组
     train_data = load_data(experiment, args.train_file_name, type='json')
 
     print('load_data', args.devlp_file_name)
@@ -253,7 +254,6 @@ if __name__ == '__main__':
         srt = SelectReasonableText(args)
         srt.init(Model)
         srt.train(train_dataloader, devlp_dataloader, save_last=False)
-
         srt = SelectReasonableText
     elif args.mission == 'output':
         srt = SelectReasonableText(args)

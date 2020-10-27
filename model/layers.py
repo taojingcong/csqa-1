@@ -28,17 +28,18 @@ class AttentionMerge(nn.Module):
         else:
             mask = (1 - mask.unsqueeze(-1).type(torch.float)) * -1000.
 
+        #(b,l,h) ->(b,l,1024)
         keys = self.hidden_layer(values)
         keys = torch.tanh(keys)
-        query_var = torch.var(self.query_)
+        query_var = torch.var(self.query_)#方差
         # (b, l, h) + (h, 1) -> (b, l, 1)
-        attention_probs = keys @ self.query_ / math.sqrt(self.attention_size * query_var)
+        attention_probs = keys @ self.query_ / math.sqrt(self.attention_size * query_var)#(b,l)
         # attention_probs = keys @ self.query_ / math.sqrt(self.attention_size)
 
         attention_probs = F.softmax(attention_probs * mask, dim=1)
         attention_probs = self.dropout(attention_probs)
 
-        context = torch.sum(attention_probs + values, dim=1)
+        context = torch.sum(attention_probs + values, dim=1)#(40,4096)=sum((40,31,1)+(40,31,4096))
         return context
 
 

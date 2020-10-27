@@ -60,6 +60,7 @@ class BaseTrainer:
 
         best_dev_loss = float('inf')
         best_dev_acc = 0
+        best_epoch=0
         self.global_step = 0
         self.train_record.init()
         self.model.zero_grad()
@@ -85,13 +86,15 @@ class BaseTrainer:
                     # print("best_dev_acc is {}".format(best_dev_acc))
                     if current_acc > best_dev_acc:
                         best_dev_acc = current_acc
+                        #best_epoch=epoch
                         self.save_model()
 
                     self.train_record.init()
 
+
         dev_record = self.evaluate(dev_dataloader)
         self._report(self.train_record, dev_record)
-
+        print("best_dev_acc:",best_dev_acc)
         if save_last:
             self.save_model()
 

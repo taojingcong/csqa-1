@@ -29,11 +29,22 @@ class Model(AlbertPreTrainedModel):
             config.hidden_size, 1024, 0.1)
 
         self.scorer = nn.Sequential(
-            nn.Dropout(0.1),
+            #nn.Dropout(0.05),
             nn.Linear(config.hidden_size, 1)
         )
 
+
         self.init_weights()
+
+    def merge(self,value):
+        h1=nn.Linear(value.shape[2],1).cuda(0)
+        h2=nn.Linear(value.shape[1],1).cuda(0)
+
+        res=h1(value).view(value.shape[0],-1)
+        res=h2(res).view(-1,5)
+        res=F.softmax(res,dim=1)
+        return res
+
 
     def score(self, h1, h2, h3, h4, h5):
         """
@@ -49,10 +60,10 @@ class Model(AlbertPreTrainedModel):
 
     def forward(self, idx, input_ids, attention_mask, token_type_ids, labels):
         """
-        input_ids: [B, 2, L]
+        input_ids: [B, 5, L]
         labels: [B, ]
         """
-        # logits: [B, 2]
+        # logits: [B, 5]
         logits = self._forward(idx, input_ids, attention_mask, token_type_ids)
         loss = F.cross_entropy(logits, labels)
 
@@ -65,7 +76,7 @@ class Model(AlbertPreTrainedModel):
 
     def _forward(self, idx, input_ids, attention_mask, token_type_ids):
         # [B, 2, L] => [B*2, L]
-        flat_input_ids = input_ids.view(-1, input_ids.size(-1))
+        flat_input_ids = input_ids.view(-1, input_ids.size(-1))#[40,41]
         flat_attention_mask = attention_mask.view(-1, attention_mask.size(-1))
         flat_token_type_ids = token_type_ids.view(-1, token_type_ids.size(-1))
 
@@ -73,15 +84,18 @@ class Model(AlbertPreTrainedModel):
             input_ids=flat_input_ids,
             attention_mask=flat_attention_mask,
             token_type_ids=flat_token_type_ids
-        )
+        )#outputs[0]=[40,41,4096]
         
         if self.kbert:
             flat_attention_mask = self.albert.get_attention_mask()
         
-        # outputs[0]: [B*2, L, H] => [B*2, H]
+        # outputs[0]: [B*cls_num, L, H] => [B*cls_num, H]
         h12 = self.att_merge(outputs[0], flat_attention_mask)
-        
-        # [B*2, H] => [B*2, 1] => [B, 2]
+
+        #merge
+        #logits=self.merge(outputs[0])
+
+        # [B*5, H] => [B*5, 1] => [B, 5]
         logits = self.scorer(h12).view(-1, 5)
 
         return logits
